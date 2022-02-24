@@ -4,5 +4,5 @@ resource "random_string" "suffix" {
 }
 
 locals {
-  postgresql_cluster_name = "vendorcorp-${var.aws_region}-${random_string.suffix.result}"
+  postgresql_cluster_name = "vendorcorp-${var.aws_region}-${lower(random_string.suffix.result)}"
 }

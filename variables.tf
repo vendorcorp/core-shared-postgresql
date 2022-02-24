@@ -9,8 +9,10 @@ variable "default_resource_tags" {
   type        = map(string)
   default = {
     environment : "development"
+    purpose : "vendorcorp"
     owner : "phorton@sonatype.com"
     sonatype-group : "se"
+    vendorcorp-purpose : "shared-core"
   }
 }
 
