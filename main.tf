@@ -29,7 +29,7 @@ module "cluster" {
   allowed_security_groups = ["sg-12345678"]
   allowed_cidr_blocks     = concat(module.shared_infrastructure.private_subnet_cidrs, ["10.200.0.0/16"])
 
-  kms_key_id          = aws_kms_key.vendorcorp_global_kms_key.id
+  kms_key_id          = data.aws_kms_key.vendorcorp_global_kms_key.arn
   storage_encrypted   = true
   apply_immediately   = true
   monitoring_interval = 10
