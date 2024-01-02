@@ -12,7 +12,7 @@ variable "default_resource_tags" {
     purpose : "vendorcorp"
     owner : "phorton@sonatype.com"
     sonatype-group : "se"
-    vendorcorp-purpose : "shared-core"
+    vendorcorp-purpose : "shared-ext"
   }
 }
 
