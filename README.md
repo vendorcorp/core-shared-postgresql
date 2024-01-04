@@ -2,6 +2,8 @@
 
 This repository contains the Terraform to build and manage our initial PostgreSQL cluster using AWS Aurora.
 
+AWS will manage the root credential for us, rotating it periodically. This can be obtained from the AWS Secret.
+
 ## READ THIS FIRST
 
 You need to have installed `aws-vault`, `aws-cli` and configured your access before you can run anything.
