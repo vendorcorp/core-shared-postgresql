@@ -1,0 +1,7 @@
+endpoints:
+  - name: "AWS RDS Database (VendorCorp Shared)"
+    group: database
+    url: "tcp://${PGSQL_HOST}:5432"
+    interval: 1m
+    conditions:
+      - "[CONNECTED] == true"

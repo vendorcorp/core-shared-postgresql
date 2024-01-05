@@ -2,10 +2,30 @@ data "aws_kms_key" "vendorcorp_global_kms_key" {
   key_id = "arn:aws:kms:us-east-2:010904452381:key/mrk-ef697dba5de8478893779bc4b044de8b"
 }
 
+################################################################################
+# Load Sonatype Shared Infra
+################################################################################
 module "shared_infrastructure" {
   source      = "git::ssh://git@github.com/sonatype/terraform-shared-infrastructure.git?ref=v0.1.2"
   environment = var.environment
 }
+
+################################################################################
+# Load VendorCorp Shared Infra
+################################################################################
+module "shared" {
+  source                   = "git::ssh://git@github.com/vendorcorp/terraform-shared-infrastructure.git?ref=v0.6.1"
+  environment              = var.environment
+}
+
+################################################################################
+# Connect to our k8s Cluster
+################################################################################
+provider "kubernetes" {
+  config_path    = "~/.kube/config"
+  config_context = module.shared.eks_cluster_arn
+}
+
 
 # resource "aws_db_parameter_group" "dbpg" {
 #   name        = "${local.postgresql_cluster_name}-parameter-group"
@@ -71,4 +91,20 @@ module "cluster" {
   # enabled_cloudwatch_logs_exports = ["postgresql"]
 
   tags = var.default_resource_tags
+}
+
+################################################################################
+# Create ConfigMap for gatus monitoring
+################################################################################
+resource "kubernetes_config_map" "gatus" {
+  metadata {
+    name = "gatus-config-core-shared-postgresql"
+    labels = {
+      "gatus.io/enabled": "true"
+    }
+  }
+
+  data = {
+    "core-shared-postgresql.yaml": "${file("gatus.yaml")}"
+  }
 }
