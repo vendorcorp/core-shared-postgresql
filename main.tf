@@ -1,21 +1,20 @@
-data "aws_kms_key" "vendorcorp_global_kms_key" {
-  key_id = "arn:aws:kms:us-east-2:010904452381:key/mrk-ef697dba5de8478893779bc4b044de8b"
-}
+################################################################################
+# KMS Key for RDS encryption
+################################################################################
+resource "aws_kms_key" "rds_kms_key" {
+  description             = "RDS Secret Encryption Key"
+  deletion_window_in_days = 30
+  enable_key_rotation     = true
 
-################################################################################
-# Load Sonatype Shared Infra
-################################################################################
-module "shared_infrastructure" {
-  source      = "git::ssh://git@github.com/sonatype/terraform-shared-infrastructure.git?ref=v0.1.2"
-  environment = var.environment
+  tags = var.default_resource_tags
 }
 
 ################################################################################
 # Load VendorCorp Shared Infra
 ################################################################################
 module "shared" {
-  source                   = "git::ssh://git@github.com/vendorcorp/terraform-shared-infrastructure.git?ref=v0.6.1"
-  environment              = var.environment
+  source      = "git::ssh://git@github.com/vendorcorp/terraform-shared-private-infrastructure.git?ref=v1.4.0"
+  environment = var.environment
 }
 
 ################################################################################
@@ -64,21 +63,20 @@ module "cluster" {
   autoscaling_min_capacity = 1
   autoscaling_max_capacity = 2
 
-  ca_cert_identifier = "rds-ca-rsa2048-g1"
+  ca_cert_identifier      = "rds-ca-rsa2048-g1"
 
-  vpc_id              = module.shared_infrastructure.vpc_id
-  subnets             = module.shared_infrastructure.private_subnet_ids
-  create_db_subnet_group = true
-  publicly_accessible = false
+  vpc_id                  = module.shared.vpc_id
+  subnets                 = module.shared.private_subnet_ids
+  create_db_subnet_group  = true
+  publicly_accessible     = false
 
-  //allowed_security_groups = ["sg-12345678"]
-  security_group_rules = {
+  security_group_rules = module.shared.gin_enabled ? { 
     ingress = {
-      cidr_blocks = concat(module.shared_infrastructure.private_subnet_cidrs, ["10.200.0.0/16"])
-    }
-  }
+      cidr_blocks = concat(module.shared.private_subnet_cidrs, ["10.200.0.0/16"])
+    } 
+  } : {}
 
-  kms_key_id          = data.aws_kms_key.vendorcorp_global_kms_key.arn
+  kms_key_id          = aws_kms_key.rds_kms_key.arn
   storage_encrypted   = true
   monitoring_interval = 10
   apply_immediately   = true
