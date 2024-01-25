@@ -74,7 +74,12 @@ module "cluster" {
     ingress = {
       cidr_blocks = concat(module.shared.private_subnet_cidrs, ["10.200.0.0/16"])
     } 
-  } : {}
+  } : {
+    ingress = {
+      # VPN users NAT in from public subnet, EKS connects from private subnets
+      cidr_blocks = concat(module.shared.private_subnet_cidrs, module.shared.public_subnet_cidrs)
+    }
+  }
 
   kms_key_id          = aws_kms_key.rds_kms_key.arn
   storage_encrypted   = true
