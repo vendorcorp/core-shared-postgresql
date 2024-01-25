@@ -13,8 +13,12 @@ resource "aws_kms_key" "rds_kms_key" {
 # Load VendorCorp Shared Infra
 ################################################################################
 module "shared" {
-  source      = "git::ssh://git@github.com/vendorcorp/terraform-shared-private-infrastructure.git?ref=v1.4.0"
+  source      = "git::ssh://git@github.com/vendorcorp/terraform-shared-private-infrastructure.git?ref=v1.4.4"
   environment = var.environment
+}
+
+module "shared_public" {
+  source      = "git::ssh://git@github.com/vendorcorp/terraform-shared-infrastructure.git?ref=v1.0.1"
 }
 
 ################################################################################
@@ -22,7 +26,7 @@ module "shared" {
 ################################################################################
 provider "kubernetes" {
   config_path    = "~/.kube/config"
-  config_context = module.shared.eks_cluster_arn
+  config_context = module.shared_public.eks_cluster_arn
 }
 
 
