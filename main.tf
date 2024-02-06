@@ -13,12 +13,12 @@ resource "aws_kms_key" "rds_kms_key" {
 # Load VendorCorp Shared Infra
 ################################################################################
 module "shared" {
-  source      = "git::ssh://git@github.com/vendorcorp/terraform-shared-private-infrastructure.git?ref=v1.4.4"
+  source      = "git::ssh://git@github.com/vendorcorp/terraform-shared-private-infrastructure.git?ref=v1.5.0"
   environment = var.environment
 }
 
 module "shared_public" {
-  source      = "git::ssh://git@github.com/vendorcorp/terraform-shared-infrastructure.git?ref=v1.0.1"
+  source      = "git::ssh://git@github.com/vendorcorp/terraform-shared-infrastructure.git?ref=v1.2.0"
 }
 
 ################################################################################
@@ -74,15 +74,10 @@ module "cluster" {
   create_db_subnet_group  = true
   publicly_accessible     = false
 
-  security_group_rules = module.shared.gin_enabled ? { 
+  security_group_rules = { 
     ingress = {
-      cidr_blocks = concat(module.shared.private_subnet_cidrs, ["10.200.0.0/16"])
+      cidr_blocks = concat(module.shared.private_subnet_cidrs)
     } 
-  } : {
-    ingress = {
-      # VPN users NAT in from public subnet, EKS connects from private subnets
-      cidr_blocks = concat(module.shared.private_subnet_cidrs, module.shared.public_subnet_cidrs)
-    }
   }
 
   kms_key_id          = aws_kms_key.rds_kms_key.arn
