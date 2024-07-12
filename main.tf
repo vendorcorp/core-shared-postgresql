@@ -54,7 +54,7 @@ module "cluster" {
 
   name            = local.postgresql_cluster_name
   engine          = "aurora-postgresql"
-  engine_version  = "15.3"
+  engine_version  = "15.4"
   master_username = "root"
   storage_type    = "aurora-iopt1"
   instance_class  = "db.r6g.large"
@@ -68,6 +68,8 @@ module "cluster" {
   autoscaling_max_capacity = 2
 
   ca_cert_identifier      = "rds-ca-rsa2048-g1"
+
+  backup_retention_period = 14
 
   vpc_id                  = module.shared.vpc_id
   subnets                 = module.shared.private_subnet_ids
